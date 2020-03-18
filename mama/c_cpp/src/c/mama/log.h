@@ -30,6 +30,38 @@ extern "C"
 {
 #endif
 
+// redefine mama_log as a macro to facilitate replacing it with a different implementation:
+// - atomic writes
+// - usec precision
+// - addl info (pid, tid, function, file, line#)
+#ifdef NYFIX_LOG
+
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#endif
+
+// NOTE: variadic macros ...
+// NOTE: following code uses (deprecated) gMamaLogLevel directly, rather than calling mama_getLogLevel
+// (which acquires a read lock on gMamaLogLevel)
+#ifdef __cplusplus
+#define mama_log(l, args...)                                                    \
+   do {                                                                         \
+      if (gMamaLogLevel >= l) {                                                 \
+         mama_log_helper(l, __FUNCTION__, __FILE__, __LINE__, args);            \
+      }                                                                         \
+   } while(0)
+
+#else
+#define mama_log(l, ...)                                                        \
+   do {                                                                         \
+      if (gMamaLogLevel >= l) {                                                 \
+         mama_log_helper(l, __FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__);   \
+      }                                                                         \
+   } while(0)
+#endif
+
+#endif
+
 #include "mama/status.h"
 
 /**
@@ -61,6 +93,9 @@ typedef enum
     LOGFILE_OVERWRITE   = 3,    /**< Logfile will overwrite */
     LOGFILE_USER        = 4     /**< User defined callback */
 } mamaLogFilePolicy;
+
+
+void mama_log_helper (MamaLogLevel level, const char* function, const char* file, int lineno, const char *format, ...);
 
 
 /**
@@ -222,7 +257,7 @@ mama_disableLogging(void);
  */
 MAMAExpDLL
 extern void
-mama_log (MamaLogLevel level, const char *format, ...);
+(mama_log) (MamaLogLevel level, const char *format, ...);
 
 /**
  * @brief Second Log Function

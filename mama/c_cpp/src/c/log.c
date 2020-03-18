@@ -141,47 +141,14 @@ void
 mamaLog_getTime(char *buffer,
                 int   bufferLength)
 {
-    /* Get the time now */
-    struct timeval timeNow;
-    memset(&timeNow, 0, sizeof(timeNow));
-    gettimeofday(&timeNow, NULL);   
-    {         
-        /* Convert to local time zone */
-        struct tm localTime;
-        time_t timeIn;
-        memset(&localTime, 0, sizeof(localTime));
-        timeIn = timeNow.tv_sec;
-        localtime_r (&timeIn, &localTime);
-        {
-            /* Format the time string */
-            size_t ft = strftime(buffer, bufferLength, "%Y-%m-%d %H:%M:%S:", &localTime);
+   struct timeval tv;
+   gettimeofday(&tv, NULL);
+   struct tm result;
+   struct tm *t = localtime_r(&tv.tv_sec, &result);
+   char localBuf[MAMALOG_TIME_BUFFER_LENGTH];
+   sprintf(localBuf, "%d/%d %02d:%02d:%02d.%06d", t->tm_mon+1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec, tv.tv_usec);
 
-            /* If 0 was returned above then the function has failed and the buffer is indeterminate */
-            if(ft == 0)
-            {
-                /* Reset the buffer */
-                strcpy(buffer, "");
-            }
-            else
-            {
-                /* Check to see if milliseconds should be appended */
-                if(g_milliseconds != 0)
-                {
-                    /* Format the number */
-                    char milliseconds[7] = "";
-                    snprintf(milliseconds, 6, "%03d: ", (unsigned int)(timeNow.tv_usec / 1000));
-
-                    /* Append the string */
-                    strcat(buffer, milliseconds);
-                }
-                /* Alternatively just append a space */
-                else
-                {
-                    strcat(buffer, " ");
-                }
-            }
-        }
-    }
+   memcpy(buffer, localBuf, bufferLength);
 }
 
 /**
@@ -463,45 +430,43 @@ mama_loginit(void)
 	}    
 }
 
+
+// TODO: Q&D hack to get atomic log writes -- needs to be cleaned up and made backward-compatible
 void MAMACALLTYPE
 mama_logDefault(MamaLogLevel level,
                 const char   *format,
                 va_list      ap)
 {
-	/* Acquire the read lock. */
-	MRSW_RESULT al = mamaLog_acquireLock(1);
-	if(MRSW_S_OK == al)
-	{
-		if ((gMamaLogLevel >= level) && (gMamaLogLevel != MAMA_LOG_LEVEL_OFF))
-		{
-			char    ts[MAMALOG_TIME_BUFFER_LENGTH] = "";       
-			FILE*   f;
-       
-			if (loggingToFile)
-			{
-				mamaLog_logLimitReached ();            
-				f = gMamaControlledLogFile;            
-			}
-			else
-				f = (gMamaLogFile == NULL) ? stderr : gMamaLogFile;
+   /* Acquire the read lock. */
+   MRSW_RESULT al = mamaLog_acquireLock(1);
+   if(MRSW_S_OK == al)
+   {
+      if ((gMamaLogLevel >= level) && (gMamaLogLevel != MAMA_LOG_LEVEL_OFF))
+      {
+         char buf[4096];
+         FILE*   f;
 
-			/* Format the current time */
-			mamaLog_getTime(ts, MAMALOG_TIME_BUFFER_LENGTH);
+         if (loggingToFile)
+         {
+            mamaLog_logLimitReached ();
+            f = gMamaControlledLogFile;
+         }
+         else
+            f = (gMamaLogFile == NULL) ? stderr : gMamaLogFile;
 
-			fprintf (f, "%s", ts);
-			if (gMamaLogLevel == MAMA_LOG_LEVEL_FINEST)
-			{
-        		fprintf (f, "(%x) : ", (unsigned int)wGetCurrentThreadId());
-			}
+         /* Format the current time */
+         mamaLog_getTime(buf, MAMALOG_TIME_BUFFER_LENGTH);
+         strcat(buf, "|");       // separator
+         size_t l = strlen(buf);
+         vsnprintf (buf+l, sizeof(buf)-(l+1), format, ap);  // leave space for terminating lf
+         strcat(buf, "\n" );
+         fwrite(buf, strlen(buf), 1, f);
+         fflush (f);
+      }
 
-			vfprintf (f, format, ap);
-			fprintf (f, "\n");
-			fflush (f);
-		}
-
-		/* Release the read lock. */
-		MRSWLock_release(g_lock, 1);
-	}
+      /* Release the read lock. */
+      MRSWLock_release(g_lock, 1);
+   }
 }
 
 void MAMACALLTYPE
@@ -996,7 +961,7 @@ mama_logToFile (const char*  file,
 }
 
 void
-mama_log (MamaLogLevel level, const char *format, ...)
+(mama_log) (MamaLogLevel level, const char *format, ...)
 {
 	/* Get the log function and the log level under the reader lock. */
 	MamaLogLevel currentLevel	= 0;
@@ -1363,4 +1328,23 @@ mama_status mama_logForceRollLogFiles(void)
 		MRSWLock_release(g_lock, 0);
 	}
     return ret;
+}
+
+#define MAX_LOG_MSG_SIZE 1024
+static const char* severityNames[] = {"NONE", "CRIT", "ERR", "WARN", "INFO", "DBG", "TRC", "MSG"};
+void mama_log_helper (MamaLogLevel level, const char* function, const char* file, int lineno, const char *format, ...)
+{
+   char temp[MAX_LOG_MSG_SIZE +1] = "";
+   if (format) {
+      va_list ap;
+      va_start(ap, format);
+      // NOTE: vsnprintf behaves differently on Windows & Linux, but following construct should work for both
+      if (vsnprintf(temp, MAX_LOG_MSG_SIZE, format, ap) == -1)
+         temp[MAX_LOG_MSG_SIZE] = '\0';
+      va_end(ap);
+   }
+
+   if (level > MAMA_LOG_LEVEL_FINEST) level = MAMA_LOG_LEVEL_FINEST;
+   // TODO: is there a better way than calling basename?
+   (mama_log)(level, "%s|%d-%lx|%s(0,0) %s|%s(%d)", function, getpid(), wthread_self(), severityNames[level], temp, basename(file), lineno);
 }
