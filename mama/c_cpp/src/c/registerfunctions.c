@@ -65,6 +65,8 @@ mamaInternal_registerMiddlewareFunctions (LIB_HANDLE  bridgeLib,
     REGISTER_OPTIONAL_BRIDGE_FUNCTION (BridgeMamaQueue_getNativeHandle, bridgeMamaQueueGetNativeHandle, bridgeMamaQueue_getNativeHandle);
     REGISTER_OPTIONAL_BRIDGE_FUNCTION (BridgeMamaQueue_setLowWatermark, bridgeMamaQueueSetLowWatermark, bridgeMamaQueue_setLowWatermark);
     REGISTER_OPTIONAL_BRIDGE_FUNCTION (BridgeMamaQueue_setHighWatermark, bridgeMamaQueueSetHighWatermark, bridgeMamaQueue_setHighWatermark);
+    REGISTER_OPTIONAL_BRIDGE_FUNCTION (BridgeMamaQueue_activate, bridgeMamaQueueActivate, bridgeMamaQueue_activate);
+    REGISTER_OPTIONAL_BRIDGE_FUNCTION (BridgeMamaQueue_deactivate, bridgeMamaQueueDeactivate, bridgeMamaQueue_deactivate);
 
     /* Transport related function pointers */
     REGISTER_BRIDGE_FUNCTION (BridgeMamaTransport_isValid, bridgeMamaTransportIsValid, bridgeMamaTransport_isValid);

@@ -137,6 +137,10 @@ typedef mama_status (*bridgeMamaQueue_setHighWatermark)
 typedef mama_status (*bridgeMamaQueue_setLowWatermark)
                                     (queueBridge queue, size_t lowWatermark);
 
+typedef mama_status (*bridgeMamaQueue_activate) (queueBridge queue);
+
+typedef mama_status (*bridgeMamaQueue_deactivate) (queueBridge queue);
+
 /*===================================================================
  =               mamaTransport bridge function pointers             =
  ====================================================================*/
@@ -557,6 +561,8 @@ typedef struct mamaBridgeImpl_
     bridgeMamaQueue_getNativeHandle         bridgeMamaQueueGetNativeHandle;
     bridgeMamaQueue_setLowWatermark         bridgeMamaQueueSetLowWatermark;
     bridgeMamaQueue_setHighWatermark        bridgeMamaQueueSetHighWatermark;
+    bridgeMamaQueue_activate                bridgeMamaQueueActivate;
+    bridgeMamaQueue_deactivate              bridgeMamaQueueDeactivate;
 
     /*Transport bridge functions*/
     bridgeMamaTransport_isValid             bridgeMamaTransportIsValid;

@@ -1018,6 +1018,45 @@ mamaQueue_setLowWatermark (mamaQueue   queue,
              (impl->mMamaQueueBridgeImpl, lowWatermark);
 }
 
+
+extern mama_status
+mamaQueue_activate (mamaQueue queue)
+{
+    mamaQueueImpl* impl = (mamaQueueImpl*)queue;
+
+    if (!impl)
+    {
+        mama_log (MAMA_LOG_LEVEL_ERROR,
+                    "mamaQueue_activate(): NULL queue.");
+        return MAMA_STATUS_NULL_ARG;
+    }
+
+    if (! impl->mBridgeImpl->bridgeMamaQueueActivate)
+       return MAMA_STATUS_NO_BRIDGE_IMPL;
+
+    return impl->mBridgeImpl->bridgeMamaQueueActivate(impl->mMamaQueueBridgeImpl);
+}
+
+
+extern mama_status
+mamaQueue_deactivate (mamaQueue queue)
+{
+    mamaQueueImpl* impl = (mamaQueueImpl*)queue;
+
+    if (!impl)
+    {
+        mama_log (MAMA_LOG_LEVEL_ERROR,
+                    "mamaQueue_deactivate(): NULL queue.");
+        return MAMA_STATUS_NULL_ARG;
+    }
+
+    if (! impl->mBridgeImpl->bridgeMamaQueueDeactivate)
+       return MAMA_STATUS_NO_BRIDGE_IMPL;
+
+    return impl->mBridgeImpl->bridgeMamaQueueDeactivate(impl->mMamaQueueBridgeImpl);
+}
+
+
 mama_status
 mamaQueue_setQueueName (mamaQueue   queue,
                         const char* name)

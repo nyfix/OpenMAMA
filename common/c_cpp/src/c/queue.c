@@ -32,7 +32,8 @@
     (ele)->mPrev->mNext = (ele)->mNext;       \
     (ele)->mNext->mPrev = (ele)->mPrev;       \
     (ele)->mNext = impl->mFirstFree.mNext;    \
-    (impl)->mFirstFree.mNext = (ele);
+    (impl)->mFirstFree.mNext = (ele);         \
+    --(impl)->mCurrSize;
 
 /*
  * Items that get queued 
@@ -57,6 +58,7 @@ typedef struct
 
     uint32_t             mMaxSize;
     uint32_t             mChunkSize;
+    int32_t              mCurrSize;
 
     /* Dummy nodes for free, head and tail */
     wombatQueueItem*  mIterator;
@@ -126,6 +128,9 @@ wombatQueue_create (wombatQueue queue, uint32_t maxSize, uint32_t initialSize,
     {
         return WOMBAT_QUEUE_NOMEM;
     }
+
+    impl->mCurrSize = 0;
+
     return WOMBAT_QUEUE_OK;
 }
 
@@ -240,6 +245,7 @@ wombatQueue_enqueue (wombatQueue queue,
     item->mPrev              = impl->mTail.mPrev;
     item->mPrev->mNext       = item;
     impl->mTail.mPrev        = item;
+    ++impl->mCurrSize;
 
     /* Notify next available thread that an item is ready */
     wsem_post (&impl->mSem);

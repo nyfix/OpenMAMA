@@ -229,6 +229,16 @@ extern mama_status
 mamaQueue_getLowWatermark (mamaQueue queue,
                            size_t*   lowWatermark);
 
+
+MAMAExpDLL
+extern mama_status
+mamaQueue_activate (mamaQueue queue);
+
+MAMAExpDLL
+extern mama_status
+mamaQueue_deactivate (mamaQueue queue);
+
+
 /**
  * Specify a set of callbacks which may be invoked in response to certain
  * conditions arising on the queue.
