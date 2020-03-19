@@ -2284,6 +2284,29 @@ mamaMsg_createFromByteBuffer (
 
 
 /**
+  * Create a mamaMsg from the provided byte buffer.
+  *
+  * The buffer is marked as owned by Mama and will be destroyed along with the
+  * mamaMsg.
+  *
+  * Any transport differences are detailed below.
+  *
+  * rv: The bufferLength parameter is not required.
+  *
+  * @param msg The mamaMsg object
+  * @param buffer The byte array containing the wire format of the message
+  * @param bufferLength The length, in bytes, of the supplied buffer
+  *
+  * @return mama_status The outcome of the operation
+  */
+MAMAExpDLL
+extern mama_status
+mamaMsg_copyFromByteBuffer (
+            mamaMsg*       msg,
+            const void*    buffer,
+            mama_size_t    bufferLength);
+
+/**
   * Return the internal message buffer as an array of bytes which is
   * suitable for writing to a file. Do not modify the returned byte
   * buffer as this is the internal message buffer and remains part of
