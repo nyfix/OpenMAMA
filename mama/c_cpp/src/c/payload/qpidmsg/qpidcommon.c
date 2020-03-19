@@ -37,9 +37,9 @@
 #include "qpidcommon.h"
 
 
-static inline void
-qpidmsgPayloadInternal_checkLengthAndIncDest (mama_size_t  written, 
-                                              mama_size_t* length, 
+inline void
+qpidmsgPayloadInternal_checkLengthAndIncDest (mama_size_t  written,
+                                              mama_size_t* length,
                                               char**        dest);
 
 /*=========================================================================
@@ -99,8 +99,8 @@ qpidmsgPayloadInternal_toMamaStatus (int status)
 }
 
 inline void
-qpidmsgPayloadInternal_checkLengthAndIncDest (mama_size_t  written, 
-                                              mama_size_t* length, 
+qpidmsgPayloadInternal_checkLengthAndIncDest (mama_size_t  written,
+                                              mama_size_t* length,
                                               char**       dest)
 {
     if (written > 0 && written <= *length)
@@ -262,7 +262,7 @@ qpidmsgPayloadInternal_elementToString (pn_data_t* payload,
 
             written = qpidmsgPayloadInternal_elementToString (payload,
                                                              atom,
-                                                             dest, 
+                                                             dest,
                                                              len);
 
             qpidmsgPayloadInternal_checkLengthAndIncDest (written, &len, &dest);
