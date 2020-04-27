@@ -3513,14 +3513,14 @@ autoloadPayloadPropertiesCb (const char* name, const char* value, void* closure)
             status = mama_loadPayloadBridge (&loadedBridge, payloadBridgeName);
 
             if (MAMA_STATUS_OK != status) {
-                mama_log (MAMA_LOG_LEVEL_FINE,
+                mama_log (MAMA_LOG_LEVEL_WARN,
                           "autoloadPayloadPropertiesCb (): "
                           "Failed to autoload payload bridge %s (autoload=%s).",
                           payloadBridgeName,
                           value);
             } else {
                 mama_log (
-                    MAMA_LOG_LEVEL_FINE,
+                    MAMA_LOG_LEVEL_NORMAL,
                     "autoloadPayloadPropertiesCb (): "
                     "Successful automatic loading of the payload bridge %s "
                     "(autoload=%s).",
