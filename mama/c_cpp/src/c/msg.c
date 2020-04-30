@@ -145,9 +145,6 @@ typedef struct mamaMsgImpl_
 
     /* Memory node buffer to use for string generation */
     memoryNode*             mReusableMemoryNode;
-
-    // see mamaMsg_copyFromByteBuffer
-    void*                   mCopyBuf;
 } mamaMsgImpl;
 
 // Struct to use during toString iterator to track buffer positions
@@ -253,9 +250,6 @@ mamaMsg_destroy (mamaMsg msg)
     }
 
     impl->mDqStrategyContext = NULL;
-
-    // see mamaMsg_copyFromByteBuffer
-    if (impl->mCopyBuf != NULL) free (impl->mCopyBuf);
 
     if (impl->mParent == NULL) free (impl);
 
@@ -510,51 +504,6 @@ mamaPayload_convertToString (mamaPayloadType payloadType)
     }
 }
 MAMAIgnoreDeprecatedClose
-
-// NOTE: With earlier Mama/Wombat releases, mamaMsg_copyFromByteBuffer was needed because mamaMsg_createFromByteBuffer didn't allocate
-// a new buffer, so passing it an address on the stack would cause a crash (see https://issues.wombatfs.com/browse/NYFIX-22).
-//
-// With OpenMAMA-omnm, it appears that msgPayloadCreate *DOES* allocate a new payload, so it's OK to pass it a stack address.
-// *BUT* it does not take ownership of the buffer, so deleting the message does NOT delete the buffer.
-//
-// With all other payloads, msgPayloadCreate does *NOT* allocate a new payload, so a new payload buffer needs to be allocated on
-// the heap, just in case the buf parameter is on the stack.
-//
-// This implementation of mamaMsg_copyFromByteBuffer works similarly to earlier version:
-// - iff the payload is NOT -omnm, allocates a new buffer on the heap, just in case the buf parameter is on the stack;
-// - in all cases, takes ownership of the buffer, so it will be deleted when its owning msg is deleted.
-mama_status
-mamaMsg_copyFromByteBuffer (
-        mamaMsg*       msg,
-        const void*    buffer,
-        mama_size_t    bufferLength)
-{
-    // Q&D HACK: omnm allocates a new payload so no need to allocate it here
-    // In all other cases (I'm looking at you, Wombat), we need to malloc the new payload just in case buffer is on stack.
-    mama_status status;
-    const char payloadID = (char) ((const char*)buffer) [0];
-    if (payloadID != MAMA_PAYLOAD_OMNM) {
-       void* newBuffer = malloc(bufferLength);
-       if (newBuffer == NULL) {
-          return MAMA_STATUS_NOMEM;
-       }
-       memcpy(newBuffer, buffer, bufferLength);
-       status = mamaMsg_createFromByteBuffer (msg, newBuffer, bufferLength);
-       // Save buffer address so it can be deleted later
-       // Note that it is NOT deleted by wombat payload library (why?), so will leak otherwise
-       // That is almost certainly a bug in wombat, but without source it's hard to pin down
-       mamaMsgImpl* impl = (mamaMsgImpl*) *msg;
-       impl->mCopyBuf = newBuffer;
-    }
-    else {
-       status = mamaMsg_createFromByteBuffer (msg, (void*)buffer, bufferLength);
-    }
-    if (MAMA_STATUS_OK == status) {
-       status = mamaMsgImpl_setMessageOwner(*msg, 1);
-    }
-
-    return status;
-}
 
 mama_status
 mamaMsg_createFromByteBuffer (
