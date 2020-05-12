@@ -146,7 +146,7 @@ mamaLog_getTime(char *buffer,
    struct tm result;
    struct tm *t = localtime_r(&tv.tv_sec, &result);
    char localBuf[MAMALOG_TIME_BUFFER_LENGTH];
-   sprintf(localBuf, "%d/%d %02d:%02d:%02d.%06d", t->tm_mon+1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec, tv.tv_usec);
+   sprintf(localBuf, "%d/%d %02d:%02d:%02d.%06ld", t->tm_mon+1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec, tv.tv_usec);
 
    memcpy(buffer, localBuf, bufferLength);
 }
@@ -226,7 +226,7 @@ void MAMACALLTYPE
 mamaLog_onLogCallback2(MamaLogLevel level,
                        const char   *format,
                        va_list      argumentList)
-{	
+{
 	/* Only continue if the callback has been supplied. */
 	if(gMamaLogFunc2 != NULL)
 	{
@@ -239,7 +239,7 @@ mamaLog_onLogCallback2(MamaLogLevel level,
 		strcat(buffer, "\0");
 
 		/* Invoke the callback function. */
-		(*gMamaLogFunc2)(level, buffer);		
+		(*gMamaLogFunc2)(level, buffer);
 	}
 }
 
@@ -279,7 +279,7 @@ mamaLog_rollLogFiles(void)
 
     fclose (gMamaControlledLogFile);
 
-	/* Need to delete the file with the highest number if it's there or 
+	/* Need to delete the file with the highest number if it's there or
 	   the rolling breaks when there are numRolledLogfiles files on disk */
 	snprintf (destFile, 1024, "%s%d", gMamaControlledLogFileName, numRolledLogfiles - 1);
 	remove(destFile);
@@ -313,7 +313,7 @@ mamaLog_rollLogFiles(void)
 /* Public Functions */
 /* ******************************************************************* */
 
-/** 
+/**
  * This function should be called to clean up after the log and will
  * free all memory held.
  */
@@ -321,7 +321,7 @@ void
 mama_logDestroy(void)
 {
     /* Acquire the write lock. */
-	mamaLog_acquireLock(0);	
+	mamaLog_acquireLock(0);
 
     /* Destroy the file name */
     if(gMamaControlledLogFileName != NULL)
@@ -427,7 +427,7 @@ mama_loginit(void)
 
 		/* Release the write lock. */
 		MRSWLock_release(g_lock, 0);
-	}    
+	}
 }
 
 
@@ -576,7 +576,7 @@ mama_forceLogPrefixDefault (const char* prefix,
 
 mama_status
 mama_setLogSize(unsigned long size)
-{	
+{
 	/* Returns. */
 	mama_status ret = MAMA_STATUS_PLATFORM;
 
@@ -599,7 +599,7 @@ mama_setLogSize(unsigned long size)
 
 mama_status
 mama_setNumLogFiles(int numFiles)
-{	
+{
 	/* Returns. */
 	mama_status ret = MAMA_STATUS_PLATFORM;
 
@@ -678,7 +678,7 @@ mama_loggingToFile(void)
 	{
 		/* Read the value. */
 		ret = loggingToFile;
-		
+
 		/* Release the read lock. */
 		MRSWLock_release(g_lock, 1);
 	}
@@ -692,7 +692,7 @@ mama_setLogSizeCb(logSizeCbType callback)
 	/* Returns. */
 	mama_status ret = MAMA_STATUS_NULL_ARG;
 	if(callback != NULL)
-	{		
+	{
 		/* Acquire the write lock. */
 		MRSW_RESULT al = mamaLog_acquireLock(0);
 		ret = MAMA_STATUS_PLATFORM;
@@ -718,7 +718,7 @@ mama_setLogCallback(mamaLogCb callback)
 	/* Returns. */
 	mama_status ret = MAMA_STATUS_NULL_ARG;
 	if(callback != NULL)
-	{		
+	{
 		/* Acquire the write lock. */
 		MRSW_RESULT al = mamaLog_acquireLock(0);
 		ret = MAMA_STATUS_PLATFORM;
@@ -738,20 +738,20 @@ mama_setLogCallback(mamaLogCb callback)
     return ret;
 }
 
-mama_status 
+mama_status
 mama_setLogCallback2(mamaLogCb2 callback)
 {
 	/* Returns. */
 	mama_status ret = MAMA_STATUS_PLATFORM;
 
 	/* Acquire the write lock. */
-	MRSW_RESULT al = mamaLog_acquireLock(0);	
+	MRSW_RESULT al = mamaLog_acquireLock(0);
 	if(MRSW_S_OK == al)
 	{
 		/* Save the callback in the global variable. */
 		gMamaLogFunc2 = callback;
 
-		/* If NULL is supplied then return the log callback to the default value. */	
+		/* If NULL is supplied then return the log callback to the default value. */
 		if(callback == NULL)
 		{
 			gMamaLogFunc = (mamaLogCb)mama_logDefault;
@@ -781,7 +781,7 @@ mama_setForceLogCallback (mamaLogCb callback)
 	/* Returns. */
 	mama_status ret = MAMA_STATUS_NULL_ARG;
 	if(callback != NULL)
-	{		
+	{
 		/* Acquire the write lock. */
 		MRSW_RESULT al = mamaLog_acquireLock(0);
 		ret = MAMA_STATUS_PLATFORM;
@@ -807,7 +807,7 @@ mama_setForceLogPrefixCallback (mamaLogCb3 callback)
 	/* Returns. */
 	mama_status ret = MAMA_STATUS_NULL_ARG;
 	if(callback != NULL)
-	{		
+	{
 		/* Acquire the write lock. */
 		MRSW_RESULT al = mamaLog_acquireLock(0);
 		ret = MAMA_STATUS_PLATFORM;
@@ -890,7 +890,7 @@ mama_disableLogging(void)
 		/* The function has succeeded. */
 		ret = MAMA_STATUS_OK;
 	}
-	
+
     return ret;
 }
 
@@ -952,9 +952,9 @@ mama_logToFile (const char*  file,
 
 			/* Release the write lock. */
 			MRSWLock_release(g_lock, 0);
-			
+
 			ret = MAMA_STATUS_OK;
-		}		
+		}
 	}
 
     return ret;
@@ -973,10 +973,10 @@ void
 	/* Get the variables. */
 	currentLevel	= gMamaLogLevel;
 	logFunction		= gMamaLogFunc;
-	
+
 	/* Release the read lock as quickly as possible. */
 	MRSWLock_release(g_lock, 1);
-	
+
 	/* Only log if this level is valid. */
 	if((currentLevel >= level) && (currentLevel != MAMA_LOG_LEVEL_OFF))
     {
@@ -993,11 +993,11 @@ void
 }
 
 void MAMACALLTYPE
-mama_log2 (MamaLogLevel level, 
+mama_log2 (MamaLogLevel level,
            const char   *message)
 {
 	/* Call mama_log with a format string. */
-	mama_log (level, "%s", message);    
+	mama_log (level, "%s", message);
 }
 
 void MAMACALLTYPE
@@ -1009,14 +1009,14 @@ mama_logDefault2 (MamaLogLevel level,
 
 	if ((gMamaLogLevel >= level) && (gMamaLogLevel != MAMA_LOG_LEVEL_OFF))
     {
-        char    ts[MAMALOG_TIME_BUFFER_LENGTH] = "";       
-        
-        FILE*   f;      
+        char    ts[MAMALOG_TIME_BUFFER_LENGTH] = "";
+
+        FILE*   f;
 
         if (loggingToFile)
         {
-            mamaLog_logLimitReached ();            
-            f = gMamaControlledLogFile;            
+            mamaLog_logLimitReached ();
+            f = gMamaControlledLogFile;
         }
         else
             f = (gMamaLogFile == NULL) ? stderr : gMamaLogFile;
@@ -1040,8 +1040,8 @@ mama_logDefault2 (MamaLogLevel level,
 }
 
 void
-mama_logVa(MamaLogLevel level, 
-           const char   *format, 
+mama_logVa(MamaLogLevel level,
+           const char   *format,
            va_list      args)
 {
 	/* Get the log function and the log level under the reader lock. */
@@ -1054,10 +1054,10 @@ mama_logVa(MamaLogLevel level,
 	/* Get the variables. */
 	currentLevel	= gMamaLogLevel;
 	logFunction		= gMamaLogFunc;
-	
+
 	/* Release the read lock as quickly as possible. */
 	MRSWLock_release(g_lock, 1);
-	
+
 	/* Only log if this level is valid. */
 	if((currentLevel >= level) && (currentLevel != MAMA_LOG_LEVEL_OFF))
     {
@@ -1067,7 +1067,7 @@ mama_logVa(MamaLogLevel level,
 }
 
 void
-mama_forceLogVa(const char   *format, 
+mama_forceLogVa(const char   *format,
            va_list      args)
 {
 	/* Get the log function and the log level under the reader lock. */
@@ -1080,7 +1080,7 @@ mama_forceLogVa(const char   *format,
 	/* Get the variables. */
 	currentLevel	= gMamaLogLevel;
 	logFunction = gMamaForceLogFunc;
-	
+
 	/* Release the read lock as quickly as possible. */
 	MRSWLock_release(g_lock, 1);
 
@@ -1089,7 +1089,7 @@ mama_forceLogVa(const char   *format,
 }
 
 void
-mama_forceLogVaWithPrefix (const char* prefix, 
+mama_forceLogVaWithPrefix (const char* prefix,
                            const char* format,
                            va_list     args)
 {
@@ -1101,10 +1101,10 @@ mama_forceLogVaWithPrefix (const char* prefix,
 
 	/* Get the variables. */
 	forceLogFunction = gMamaForceLogPrefixFunc;
-	
+
 	/* Release the read lock as quickly as possible. */
 	/* Release the read lock as quickly as possible. */
-	MRSWLock_release(g_lock, 1);	
+	MRSWLock_release(g_lock, 1);
 	{
             /* Call the log function .*/
             forceLogFunction(prefix, format, args);
@@ -1122,9 +1122,9 @@ mama_forceLog (MamaLogLevel level, const char *format, ...)
 
 	/* Get the variables. */
 	forceLogFunction = gMamaForceLogFunc;
-	
+
 	/* Release the read lock as quickly as possible. */
-	MRSWLock_release(g_lock, 1);	
+	MRSWLock_release(g_lock, 1);
 	{
 		/* Create the va_list. */
 		va_list ap;
@@ -1162,7 +1162,7 @@ mama_setLogLevel (MamaLogLevel level)
 
 	/* Check that the supplied level is valid. */
 	if ((level >= MAMA_LOG_LEVEL_OFF) && (level <= MAMA_LOG_LEVEL_FINEST))
-    {		
+    {
 		/* Acquire the write lock. */
 		MRSW_RESULT al = mamaLog_acquireLock(0);
 		ret = MAMA_STATUS_PLATFORM;
@@ -1194,7 +1194,7 @@ mama_getLogLevel(void)
 	{
 		/* Read the value. */
 		ret = gMamaLogLevel;
-		
+
 		/* Release the read lock. */
 		MRSWLock_release(g_lock, 1);
 	}
