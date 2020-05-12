@@ -135,8 +135,8 @@ typedef struct mamaMsgImpl_
     mamaBridgeImpl*         mBridgeImpl;
     /*The bridge specific message*/
     msgBridge               mBridgeMessage;
-    /*If we have detached the middleware message we will own it
-     and are responsible for destroying it*/
+    /*If set to 1, mamaMsg_destroy will also call the
+     payload bridge's destroy function*/
     int                     mMessageOwner;
 
     /*The context if this is a msg from the dqStrategy cache*/
@@ -3285,7 +3285,7 @@ mamaMsg_toJsonStringIterCb(const mamaMsg       msg,
     else {
         written = snprintf(target, remaining, "\"%s\":", name);
     }
-    
+
     iterClosure->position += written;
     target += written;
     remaining -= written;
