@@ -47,15 +47,14 @@ extern "C"
 #define mama_log(l, args...)                                                    \
    do {                                                                         \
       if (gMamaLogLevel >= l) {                                                 \
-         mama_log_helper(l, __FUNCTION__, __FILE__, __LINE__, args);            \
+         mama_log_helper(l, __func__, __FILE__, __LINE__, args);            \
       }                                                                         \
    } while(0)
-
 #else
 #define mama_log(l, ...)                                                        \
    do {                                                                         \
       if (gMamaLogLevel >= l) {                                                 \
-         mama_log_helper(l, __FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__);   \
+         mama_log_helper(l, __func__, __FILE__, __LINE__, ##__VA_ARGS__);   \
       }                                                                         \
    } while(0)
 #endif
