@@ -1347,9 +1347,6 @@ void mama_log_helper (MamaLogLevel level, const char* function, const char* file
    }
 
    if (level > MAMA_LOG_LEVEL_FINEST) level = MAMA_LOG_LEVEL_FINEST;
-
    // TODO: is there a better way than calling basename?
-   char tempName[PATH_MAX];
-   strcpy(tempName, file);
-   (mama_log)(level, "%s|%d-%lx|%s(0,0) %s|%s(%d)", function, getpid(), wthread_self(), severityNames[level], temp, basename(tempName), lineno);
+   (mama_log)(level, "%s|%d-%lx|%s(0,0) %s|%s(%d)", function, getpid(), wthread_self(), severityNames[level], temp, basename(file), lineno);
 }
