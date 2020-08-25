@@ -1525,9 +1525,13 @@ mama_closeCount (unsigned int* count)
                  */
                 if(payloadLib->keepLoaded != 1) {
                     free (payloadLib->bridge);
+                    payloadLib->bridge  = NULL;
+                    payloadLib->id      = MAMA_PAYLOAD_NULL;
+
                     if(payloadLib->library)
                     {
                         closeSharedLib (payloadLib->library);
+                        payloadLib->library = NULL;
                     }
 
                     /* Free the payloadLib structure */
@@ -3523,14 +3527,14 @@ autoloadPayloadPropertiesCb (const char* name, const char* value, void* closure)
             status = mama_loadPayloadBridge (&loadedBridge, payloadBridgeName);
 
             if (MAMA_STATUS_OK != status) {
-                mama_log (MAMA_LOG_LEVEL_WARN,
+                mama_log (MAMA_LOG_LEVEL_FINE,
                           "autoloadPayloadPropertiesCb (): "
                           "Failed to autoload payload bridge %s (autoload=%s).",
                           payloadBridgeName,
                           value);
             } else {
                 mama_log (
-                    MAMA_LOG_LEVEL_NORMAL,
+                    MAMA_LOG_LEVEL_FINE,
                     "autoloadPayloadPropertiesCb (): "
                     "Successful automatic loading of the payload bridge %s "
                     "(autoload=%s).",

@@ -192,7 +192,12 @@ mamaMsg_destroy (mamaMsg msg)
 
     if (impl->mPayloadBridge && impl->mMessageOwner)
     {
-        if (MAMA_STATUS_OK != impl->mPayloadBridge->msgPayloadDestroy (impl->mPayload))
+        if (NULL == mamaInternal_findPayload(impl->mPayloadId))
+        {
+            mama_log(MAMA_LOG_LEVEL_WARN, "mamaMsg_destroy(): "
+                "Could not clean up MAMA message as payload bridge has already been closed. Possible leak.");
+        }
+        else if (MAMA_STATUS_OK != impl->mPayloadBridge->msgPayloadDestroy (impl->mPayload))
         {
             mama_log (MAMA_LOG_LEVEL_ERROR, "mamaMsg_destroy(): "
                      "Could not clear message payload.");
@@ -3285,7 +3290,7 @@ mamaMsg_toJsonStringIterCb(const mamaMsg       msg,
     else {
         written = snprintf(target, remaining, "\"%s\":", name);
     }
-
+    
     iterClosure->position += written;
     target += written;
     remaining -= written;

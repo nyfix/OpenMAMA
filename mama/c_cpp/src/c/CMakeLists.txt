@@ -9,6 +9,7 @@ endif()
 
 include(FindAPR)
 
+find_package(APR REQUIRED)
 find_package(Threads REQUIRED)
 
 get_target_property(WOMBAT_INCLUDES wombatcommon INCLUDE_DIRECTORIES)
