@@ -65,6 +65,22 @@ if(ENABLE_UBSAN)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${UBSAN_FLAGS}")
 endif()
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
+  # Find more information: https://cmake.org/Wiki/CMake_RPATH_handling
+
+  # Apply CMP0042: MACOSX_RPATH is enabled by default
+  cmake_policy(SET CMP0042 NEW)
+
+  # Add an install rpath if it is not a system directory
+  list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" isSystemDir)
+  if("${isSystemDir}" STREQUAL "-1")
+    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+  endif()
+
+  # Add linker search paths pointing to external dependencies
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+endif()
+
 add_subdirectory (common)
 add_subdirectory (mama)
 
