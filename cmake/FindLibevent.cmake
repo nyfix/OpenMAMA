@@ -1,16 +1,20 @@
 # find LibEvent
 # an event notification library (http://libevent.org/)
 #
-# Usage: 
+# Usage:
 # LIBEVENT_INCLUDE_DIRS, where to find LibEvent headers
 # LIBEVENT_LIBRARIES, LibEvent libraries
 # Libevent_FOUND, If false, do not try to use libevent
 
 set(LIBEVENT_ROOT CACHE PATH "Root directory of libevent installation")
-set(LibEvent_EXTRA_PREFIXES /usr/local /opt/local "$ENV{HOME}" ${LIBEVENT_ROOT})
+set(LibEvent_EXTRA_PREFIXES ${LIBEVENT_ROOT} /usr/local /opt/local "$ENV{HOME}")
 foreach(prefix ${LibEvent_EXTRA_PREFIXES})
-  list(APPEND LibEvent_INCLUDE_PATHS "${prefix}/include")
-  list(APPEND LibEvent_LIBRARIES_PATHS "${prefix}/lib")
+  if(EXISTS "${prefix}/include")
+     list(APPEND LibEvent_INCLUDE_PATHS "${prefix}/include")
+  endif()
+  if(EXISTS "${prefix}/lib")
+    list(APPEND LibEvent_LIBRARIES_PATHS "${prefix}/lib")
+  endif()
 endforeach()
 
 # Looking for "event.h" will find the Platform SDK include dir on windows
@@ -20,6 +24,9 @@ find_path(LIBEVENT_INCLUDE_DIRS evhttp.h event.h PATHS ${LibEvent_INCLUDE_PATHS}
 # "lib" prefix is needed on Windows in some cases
 # newer versions of libevent use three libraries
 find_library(LIBEVENT_LIBRARIES NAMES event event_core event_extra libevent PATHS ${LibEvent_LIBRARIES_PATHS})
+
+message(STATUS "LibEvent_LIBRARIES_PATHS=${LibEvent_LIBRARIES_PATHS}")
+message(STATUS "LIBEVENT_LIBRARIES=${LIBEVENT_LIBRARIES}")
 
 if (LIBEVENT_LIBRARIES AND LIBEVENT_INCLUDE_DIRS)
   set(Libevent_FOUND TRUE)

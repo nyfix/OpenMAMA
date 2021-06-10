@@ -6,6 +6,10 @@ endif()
 include(FindLibevent)
 find_package(Libevent REQUIRED)
 
+add_library(event SHARED IMPORTED)
+set_property(TARGET event PROPERTY IMPORTED_LOCATION ${LIBEVENT_LIBRARIES})
+set_property(TARGET event PROPERTY IMPORTED_NO_SONAME 1)
+
 string(TOLOWER ${CMAKE_SYSTEM_NAME} system)
 
 include_directories(${LIBEVENT_INCLUDE_DIRS})
@@ -51,7 +55,7 @@ elseif(UNIX)
     target_link_libraries(mamabaseimpl
                           wombatcommon
                           mama
-                          ${LIBEVENT_LIBRARIES}
+                          event
                           ${UUID_LIBRARIES})
     install(TARGETS mamabaseimpl DESTINATION lib)
 endif()
