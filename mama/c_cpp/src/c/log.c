@@ -366,6 +366,12 @@ mama_loginit(void)
 			g_milliseconds = properties_GetPropertyValueAsBoolean(propstring);
 		}
 
+		/* allow logging level to be set w/env var */
+		char* temp = getenv("MAMA_LOGGING_LEVEL");
+		if (temp) {
+		  	gMamaLogLevel = atoi(temp);
+		  	}
+
 		propstring = properties_Get(mamaInternal_getProperties(), LEVELPROPERTY);
 		if (propstring)
 		{
@@ -1195,7 +1201,7 @@ mama_getLogLevel(void)
 	if(MRSW_S_OK == al)
 	{
 		/* Read the value. */
-		ret = gMamaLogLevel;
+      ret = gMamaLogLevel;
 
 		/* Release the read lock. */
 		MRSWLock_release(g_lock, 1);
