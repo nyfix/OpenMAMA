@@ -204,7 +204,7 @@ mama_initPlugins(void)
     mama_loadPlugin ("mamacenterprise");
 #endif /* WITH_ENTERPRISE */
 
-    mama_loadPlugin("dqstrategy");
+    //mama_loadPlugin("dqstrategy");
 
     return MAMA_STATUS_OK;
 }
