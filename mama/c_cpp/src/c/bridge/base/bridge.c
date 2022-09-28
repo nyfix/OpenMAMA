@@ -138,6 +138,8 @@ baseBridge_close (mamaBridge bridgeImpl)
     /* Stop and destroy the io thread */
     baseBridgeMamaIoImpl_stop ((void*)closure);
 
+    free(closure);
+
     return status;
 }
 
