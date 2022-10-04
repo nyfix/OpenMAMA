@@ -31,6 +31,7 @@ set (INSTALL_RUNTIME_DEPENDENCIES true CACHE BOOL "Whether or not to include dep
 option(ENABLE_ASAN "Build with address sanitizer" OFF)
 if(ENABLE_ASAN)
   message(STATUS "Instrumenting with Address Sanitizer")
+  add_definitions("-DENABLE_ASAN")
   set(CMAKE_BUILD_TYPE "RelWithDebInfo")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer")
