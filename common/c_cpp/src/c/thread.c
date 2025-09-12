@@ -23,6 +23,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
+#include <execinfo.h>
+
 #include "wombat/thread.h"
 #include "wombat/wtable.h"
 
@@ -41,6 +44,7 @@ typedef struct wombatThread_
 {
     wthread_t               mThread;        /* Thread object (may not be defined yet). */
     char*                   mThreadName;    /* Thread name. */
+    int                     mJoined;
     int                     mIsCpuSet;      /* Has affinity been set? */
     CPU_AFFINITY_SET        mCpuSet;        /* Affinity as defined (not necessarily as exists) */
 } wombatThreadImpl;
@@ -74,7 +78,7 @@ wombatThread_create(
     wombatThreadStatus      status;
 
     if (!threadName || !wombatThread) return WOMBAT_THREAD_INVALID_ARG;
-   
+
     status = allocateWombatThreadDict();
     if (status != WOMBAT_THREAD_OK) return status;
 
@@ -115,7 +119,7 @@ wombatThread_destroy (const char* name)
     if (!name) return WOMBAT_THREAD_INVALID_ARG;
 
     wthread_static_mutex_lock(&gWombatThreadsMutex);
-    
+
     impl = wtable_lookup (gWombatThreadDict, name);
 
     /* Remove from Thread Dictionary */
@@ -130,7 +134,19 @@ wombatThread_destroy (const char* name)
     wthread_static_mutex_unlock(&gWombatThreadsMutex);
 
     // Attempt to join the thread to ensure it has terminated
-    wthread_join (impl->mThread, NULL);
+    //#if 0
+    int result = wthread_join (impl->mThread, NULL);
+    fprintf(stderr, "joined thread(0x%lx), result=%d\n", impl->mThread, result);
+#if 0
+      void* symbols[40];
+      int size = backtrace(symbols, 40);
+      backtrace_symbols_fd(symbols, size, STDERR_FILENO);
+#endif
+    impl->mJoined = 1;
+    assert(result == 0);
+
+    //#endif
+    //int result = wthread_join (impl->mThread, NULL);
 
     if (impl)
     {
