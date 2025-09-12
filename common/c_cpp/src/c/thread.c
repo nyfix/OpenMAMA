@@ -23,8 +23,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
-#include <execinfo.h>
 
 #include "wombat/thread.h"
 #include "wombat/wtable.h"
@@ -134,19 +132,7 @@ wombatThread_destroy (const char* name)
     wthread_static_mutex_unlock(&gWombatThreadsMutex);
 
     // Attempt to join the thread to ensure it has terminated
-    //#if 0
-    int result = wthread_join (impl->mThread, NULL);
-    fprintf(stderr, "joined thread(0x%lx), result=%d\n", impl->mThread, result);
-#if 0
-      void* symbols[40];
-      int size = backtrace(symbols, 40);
-      backtrace_symbols_fd(symbols, size, STDERR_FILENO);
-#endif
-    impl->mJoined = 1;
-    assert(result == 0);
-
-    //#endif
-    //int result = wthread_join (impl->mThread, NULL);
+    wthread_join (impl->mThread, NULL);
 
     if (impl)
     {

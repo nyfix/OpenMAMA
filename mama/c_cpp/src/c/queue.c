@@ -18,9 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA
  */
-#include <assert.h>
-#include <execinfo.h>
-
 #include "wombat/port.h"
 #include <mama/mama.h>
 #include <mama/queue.h>
@@ -1399,17 +1396,6 @@ mamaDispatcher_destroy (mamaDispatcher dispatcher)
     {
         mamaQueue_stopDispatch (impl->mQueue);
     }
-
-    /* Wait for the thread to return. */
-    int result = wthread_join (impl->mThread, NULL);
-    fprintf(stderr, "joined thread(0x%lx), result=%d\n", impl->mThread, result);
-
-#if 0
-      void* symbols[40];
-      int size = backtrace(symbols, 40);
-      backtrace_symbols_fd(symbols, size, STDERR_FILENO);
-#endif
-    assert(result == 0);
 
     wInterlocked_destroy (&impl->mIsDispatching);
 
