@@ -18,7 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA
  */
-
 #include "wombat/port.h"
 #include <mama/mama.h>
 #include <mama/queue.h>
@@ -1398,8 +1397,6 @@ mamaDispatcher_destroy (mamaDispatcher dispatcher)
         mamaQueue_stopDispatch (impl->mQueue);
     }
 
-    /* Wait for the thread to return. */
-    wthread_join (impl->mThread, NULL);
     wInterlocked_destroy (&impl->mIsDispatching);
 
     /* Destroy the thread handle. */
