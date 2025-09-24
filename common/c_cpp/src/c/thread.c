@@ -23,7 +23,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
 #include "wombat/thread.h"
 #include "wombat/wtable.h"
 
@@ -42,7 +41,6 @@ typedef struct wombatThread_
 {
     wthread_t               mThread;        /* Thread object (may not be defined yet). */
     char*                   mThreadName;    /* Thread name. */
-    int                     mJoined;
     int                     mIsCpuSet;      /* Has affinity been set? */
     CPU_AFFINITY_SET        mCpuSet;        /* Affinity as defined (not necessarily as exists) */
 } wombatThreadImpl;
@@ -76,7 +74,7 @@ wombatThread_create(
     wombatThreadStatus      status;
 
     if (!threadName || !wombatThread) return WOMBAT_THREAD_INVALID_ARG;
-
+   
     status = allocateWombatThreadDict();
     if (status != WOMBAT_THREAD_OK) return status;
 
@@ -117,7 +115,7 @@ wombatThread_destroy (const char* name)
     if (!name) return WOMBAT_THREAD_INVALID_ARG;
 
     wthread_static_mutex_lock(&gWombatThreadsMutex);
-
+    
     impl = wtable_lookup (gWombatThreadDict, name);
 
     /* Remove from Thread Dictionary */
